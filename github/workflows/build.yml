@@ -10,18 +10,47 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.x'
 
+      - name: Download TShock 6.1.0
+        run: |
+          mkdir -p tshock
+          curl -L --fail -o tshock/tshock.zip \
+            https://github.com/Pryaxis/TShock/releases/download/v6.1.0/TShock-6.1.0-for-Terraria-1.4.5.6-windows-x64-Release.zip
+          unzip -q tshock/tshock.zip -d tshock/server
+
+      - name: Prepare plugin references
+        shell: bash
+        run: |
+          mkdir -p references
+
+          TSHOCK_API="$(find tshock/server -type f -name 'TShockAPI.dll' -print -quit)"
+          TERRARIA_API="$(find tshock/server -type f -name 'TerrariaApi.Server.dll' -print -quit)"
+          TERRARIA_SERVER="$(find tshock/server -type f \( -name 'TerrariaServer.dll' -o -name 'TerrariaServer.exe' \) -print -quit)"
+
+          echo "TShockAPI: $TSHOCK_API"
+          echo "TerrariaApi.Server: $TERRARIA_API"
+          echo "TerrariaServer: $TERRARIA_SERVER"
+
+          test -n "$TSHOCK_API" || (echo "TShockAPI.dll not found"; find tshock/server -maxdepth 3 -type f | sort; exit 1)
+          test -n "$TERRARIA_API" || (echo "TerrariaApi.Server.dll not found"; find tshock/server -maxdepth 3 -type f | sort; exit 1)
+          test -n "$TERRARIA_SERVER" || (echo "TerrariaServer assembly not found"; find tshock/server -maxdepth 3 -type f | sort; exit 1)
+
+          cp "$TSHOCK_API" references/TShockAPI.dll
+          cp "$TERRARIA_API" references/TerrariaApi.Server.dll
+          cp "$TERRARIA_SERVER" references/TerrariaServer.exe
+
       - name: Build
-        run: dotnet build -c Release
+        run: dotnet build DualWieldTShock.csproj -c Release --no-restore
 
       - name: Upload DLL
         uses: actions/upload-artifact@v4
         with:
-          name: DualWieldPlugin
-          path: '**/bin/Release/**/*.dll'
+          name: DualWieldTShock
+          path: bin/Release/net9.0/DualWieldTShock.dll
+          if-no-files-found: error
