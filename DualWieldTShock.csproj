@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>DualWieldTShock</AssemblyName>
+    <RootNamespace>DualWieldTShock</RootNamespace>
+    <TShockDir Condition="'$(TShockDir)' == ''">$(MSBuildProjectDirectory)/references</TShockDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="TShockAPI">
+      <HintPath>$(TShockDir)/TShockAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="TerrariaApi.Server">
+      <HintPath>$(TShockDir)/TerrariaApi.Server.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="TerrariaServer">
+      <HintPath>$(TShockDir)/TerrariaServer.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
