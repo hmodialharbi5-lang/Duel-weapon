@@ -17,26 +17,11 @@ jobs:
         with:
           dotnet-version: '9.x'
 
-      - name: Download TShock 6.1.0
-        run: |
-          mkdir -p tshock
-          curl -L --fail -o tshock/tshock.zip \
-            https://github.com/Pryaxis/TShock/releases/download/v6.1.0/TShock-6.1.0-for-Terraria-1.4.5.6-linux-x64-Release.zip
-          unzip -q tshock/tshock.zip -d tshock/server
-
-      - name: Find references
-        run: |
-          mkdir -p references
-
-          find tshock/server -type f -name "TShockAPI.dll" -exec cp {} references/TShockAPI.dll \;
-          find tshock/server -type f -name "TerrariaApi.Server.dll" -exec cp {} references/TerrariaApi.Server.dll \;
-          find tshock/server -type f -name "TerrariaServer.dll" -exec cp {} references/TerrariaServer.dll \;
-
-          echo "References:"
-          ls -lh references
+      - name: Restore
+        run: dotnet restore DualWieldTShock.csproj
 
       - name: Build
-        run: dotnet build DualWieldTShock.csproj -c Release
+        run: dotnet build DualWieldTShock.csproj -c Release --no-restore
 
       - name: Upload DLL
         uses: actions/upload-artifact@v4
